@@ -6,7 +6,7 @@
 #include <concepts>
 #include "luna_state_def.h"
 
-namespace luna {
+namespace stella {
     template<typename InputType, std::integral OutputType>
     class crypto_checksum {
     public:
@@ -77,8 +77,6 @@ namespace luna {
 
     enum class state_t : uint8_t;
 
-    enum class pyro_state_t : uint8_t;
-
     template<typename T>
     union vec3_u {
         struct {
@@ -118,9 +116,6 @@ namespace luna {
 
         // State and pyro state (32 bit)
         state_t ps{};
-        pyro_state_t pyro_a{};
-        pyro_state_t pyro_b{};
-        pyro_state_t pyro_c{};
 
         // Internal (32 bit)
         int32_t cpu_temp{};

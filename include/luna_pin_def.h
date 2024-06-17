@@ -4,7 +4,7 @@
 #include <PinNames.h>
 #include <Arduino_Extended.h>
 
-namespace luna {
+namespace stella {
     enum RGB_MASK {
         BLACK = 0b000,
         BLUE,
@@ -17,7 +17,7 @@ namespace luna {
     };
 }
 
-namespace luna::pins {
+namespace stella::pins {
     namespace power {
         constexpr PinName PIN_24V = PB_12;
     }

@@ -102,44 +102,44 @@ struct ms_ref_t {
 
 // Hardware interfaces
 
-HardwareSerial Serial2(luna::pins::comm::lora::UART_RX, luna::pins::comm::lora::UART_TX);
-HardwareSerial Serial4(luna::pins::comm::rpi::UART_RX, luna::pins::comm::rpi::UART_TX);
+HardwareSerial Serial2(stella::pins::comm::lora::UART_RX, stella::pins::comm::lora::UART_TX);
+HardwareSerial Serial4(stella::pins::comm::rpi::UART_RX, stella::pins::comm::rpi::UART_TX);
 
-TwoWire Wire1(to_digital(luna::pins::i2c::ch1::SDA),
-              to_digital(luna::pins::i2c::ch1::SCL));
+TwoWire Wire1(to_digital(stella::pins::i2c::ch1::SDA),
+              to_digital(stella::pins::i2c::ch1::SCL));
 
-SPIClass SPI_1(to_digital(luna::pins::spi::ch1::MOSI),
-               to_digital(luna::pins::spi::ch1::MISO),
-               to_digital(luna::pins::spi::ch1::SCK));
-SPIClass SPI_3(to_digital(luna::pins::spi::ch3::MOSI),
-               to_digital(luna::pins::spi::ch3::MISO),
-               to_digital(luna::pins::spi::ch3::SCK));
-SPIClass SPI_4(to_digital(luna::pins::spi::ch4::MOSI),
-               to_digital(luna::pins::spi::ch4::MISO),
-               to_digital(luna::pins::spi::ch4::SCK));
+SPIClass SPI_1(to_digital(stella::pins::spi::ch1::MOSI),
+               to_digital(stella::pins::spi::ch1::MISO),
+               to_digital(stella::pins::spi::ch1::SCK));
+SPIClass SPI_3(to_digital(stella::pins::spi::ch3::MOSI),
+               to_digital(stella::pins::spi::ch3::MISO),
+               to_digital(stella::pins::spi::ch3::SCK));
+SPIClass SPI_4(to_digital(stella::pins::spi::ch4::MOSI),
+               to_digital(stella::pins::spi::ch4::MISO),
+               to_digital(stella::pins::spi::ch4::SCK));
 
-SdSpiConfig flash_config(luna::pins::spi::cs::flash,
+SdSpiConfig flash_config(stella::pins::spi::cs::flash,
                          SHARED_SPI,
-                         SD_SCK_MHZ(luna::config::SD_SPI_CLOCK_MHZ),
+                         SD_SCK_MHZ(stella::config::SD_SPI_CLOCK_MHZ),
                          &SPI_3);
-SdSpiConfig sd_config(luna::pins::spi::cs::sd,
+SdSpiConfig sd_config(stella::pins::spi::cs::sd,
                       SHARED_SPI,
-                      SD_SCK_MHZ(luna::config::SD_SPI_CLOCK_MHZ),
+                      SD_SCK_MHZ(stella::config::SD_SPI_CLOCK_MHZ),
                       &SPI_3);
 
-on_off_timer::interval_params buzzer_intervals(luna::config::BUZZER_ON_INTERVAL,
-                                               luna::config::BUZZER_OFF_INTERVAL(luna::config::BUZZER_IDLE_INTERVAL));
+on_off_timer::interval_params buzzer_intervals(stella::config::BUZZER_ON_INTERVAL,
+                                               stella::config::BUZZER_OFF_INTERVAL(stella::config::BUZZER_IDLE_INTERVAL));
 
 // Hardware references
 
-HardwareSerial &USB_DEBUG    = Serial4;
-HardwareSerial &UART_LORA    = Serial2;
-HardwareSerial &UART_RFD900X = Serial4;
+HardwareSerial &USB_DEBUG = Serial4;
+HardwareSerial &UART_LORA = Serial2;
+HardwareSerial &UART_RPI  = Serial4;
 
 // Software data
 
-luna::sensor_data_t sensor_data;
-uint8_t rx_buffer[luna::config::MESSAGE_BUFFER_SIZE];
+stella::sensor_data_t sensor_data;
+uint8_t rx_buffer[stella::config::MESSAGE_BUFFER_SIZE];
 
 // Software filters
 struct software_filters {
@@ -147,8 +147,8 @@ struct software_filters {
     vt::kf_pos<FILTER_ORDER> ms2_pres{dt_base, covariance, alpha, beta};
 
     struct {
-        luna::vec3_u<vt::kf_pos<4>> acc{dt_base, covariance, alpha, beta};
-        luna::vec3_u<vt::kf_pos<4>> gyro{dt_base, covariance, alpha, beta};
+        stella::vec3_u<vt::kf_pos<4>> acc{dt_base, covariance, alpha, beta};
+        stella::vec3_u<vt::kf_pos<4>> gyro{dt_base, covariance, alpha, beta};
     } imu_1, imu_2;
 
     vt::kf_pos<FILTER_ORDER> altitude{dt_base, covariance, alpha, beta};
@@ -160,8 +160,8 @@ struct software_filters {
 String tx_data;
 String sd_data;
 
-time_type tx_interval  = luna::config::TX_IDLE_INTERVAL;
-time_type log_interval = luna::config::LOG_IDLE_INTERVAL;
+time_type tx_interval  = stella::config::TX_IDLE_INTERVAL;
+time_type log_interval = stella::config::LOG_IDLE_INTERVAL;
 
 // Peripherals
 
@@ -170,12 +170,12 @@ peripherals_t pvalid;
 FsUtil<flash_sd_t, flash_file_t> flash_util;
 FsUtil<sd_sd_t, sd_file_t> sd_util;
 
-INA236 ina236(luna::config::INA236_ADDRESS, &Wire1);
+INA236 ina236(stella::config::INA236_ADDRESS, &Wire1);
 SFE_UBLOX_GNSS gnss_m9v;
 ICM_20948_SPI imu_icm20948;
-ICM42688 imu_icm42688(SPI_1, to_digital(luna::pins::spi::cs::icm42688));
-MS5611_SPI ms1(to_digital(luna::pins::spi::cs::ms1), &SPI_1);
-MS5611_SPI ms2(to_digital(luna::pins::spi::cs::ms2), &SPI_4);
+ICM42688 imu_icm42688(SPI_1, to_digital(stella::pins::spi::cs::icm42688));
+MS5611_SPI ms1(to_digital(stella::pins::spi::cs::ms1), &SPI_1);
+MS5611_SPI ms2(to_digital(stella::pins::spi::cs::ms2), &SPI_4);
 
 ms_ref_t ms1_ref = {ms1, sensor_data.ms1_temp, sensor_data.ms1_pres, sensor_data.ms1_alt, filters.ms1_pres};
 ms_ref_t ms2_ref = {ms2, sensor_data.ms2_temp, sensor_data.ms2_pres, sensor_data.ms2_alt, filters.ms2_pres};
@@ -205,12 +205,12 @@ inline const char *sensor_mode_string(const uint8_t mode) {
 struct {
     float altitude;
     float altitude_offset;
-    luna::vec3_u<double> acc;
+    stella::vec3_u<double> acc;
 } ground_truth;
 
 HardwareTimer timer_led(TIM2);
 HardwareTimer timer_buz(TIM3);
-luna::pins::PwmLed pwm_led(timer_led, timer_buz);
+stella::pins::PwmLed pwm_led(timer_led, timer_buz);
 
 template<typename SdType, typename FileType>
 extern void init_storage(FsUtil<SdType, FileType> &sd_util_instance);
@@ -245,41 +245,41 @@ extern void buzzer_led_control(on_off_timer::interval_params *intervals_ms);
 
 void setup() {
     // GPIO and Digital Pins
-    dout_low << luna::pins::gpio::LED_R
-             << luna::pins::gpio::LED_G
-             << luna::pins::gpio::LED_B
-             << luna::pins::pyro::SIG_A
-             << luna::pins::pyro::SIG_B
-             << luna::pins::pyro::SIG_C
-             << luna::pins::power::PIN_24V;
+    dout_low << stella::pins::gpio::LED_R
+             << stella::pins::gpio::LED_G
+             << stella::pins::gpio::LED_B
+             << stella::pins::pyro::SIG_A
+             << stella::pins::pyro::SIG_B
+             << stella::pins::pyro::SIG_C
+             << stella::pins::power::PIN_24V;
 
     pwm_led.set_range(16, 255);
 
-    pwm_led.set_color(luna::YELLOW);
+    pwm_led.set_color(stella::YELLOW);
     pwm_led.set_frequency(2);
     pwm_led.reset();
 
-    timer_buz.setOverflow(luna::config::BUZZER_ON_INTERVAL * 1000, MICROSEC_FORMAT);
+    timer_buz.setOverflow(stella::config::BUZZER_ON_INTERVAL * 1000, MICROSEC_FORMAT);
     timer_buz.attachInterrupt([] {
-        gpio_write << io_function::pull_low(luna::pins::gpio::BUZZER);
+        gpio_write << io_function::pull_low(stella::pins::gpio::BUZZER);
         timer_buz.pause();
     });
     timer_buz.pause();
 
     // GPIO Configuration
 
-    dout_low << luna::pins::gpio::BUZZER;
+    dout_low << stella::pins::gpio::BUZZER;
 
-    din_config << luna::pins::pyro::SENS_A
-               << luna::pins::pyro::SENS_B
-               << luna::pins::pyro::SENS_C
-               << luna::pins::gpio::USER_1
-               << luna::pins::gpio::USER_2;
+    din_config << stella::pins::pyro::SENS_A
+               << stella::pins::pyro::SENS_B
+               << stella::pins::pyro::SENS_C
+               << stella::pins::gpio::USER_1
+               << stella::pins::gpio::USER_2;
 
     // UART Interfaces
 
-    UART_LORA.begin(luna::config::UART_BAUD);
-    UART_RFD900X.begin(luna::config::RFD900X_BAUD);
+    UART_LORA.begin(stella::config::UART_BAUD);
+    UART_RPI.begin(stella::config::RFD900X_BAUD);
 
     // SPI Mode
     SPI_3.setDataMode(SPI_MODE0);
@@ -313,7 +313,7 @@ void setup() {
     // Battery voltage monitor
     pvalid.ina236 = ina236.begin();
     if (pvalid.ina236) {
-        ina236.setADCRange(luna::config::INA236ADCRange::RANGE_80MV);
+        ina236.setADCRange(stella::config::INA236ADCRange::RANGE_80MV);
     }
 
 
@@ -348,7 +348,7 @@ void setup() {
     if (pvalid.imu_icm42688) {
     }
 
-    pvalid.imu_icm20948 = imu_icm20948.begin(to_digital(luna::pins::spi::cs::icm20948), SPI_4) == ICM_20948_Stat_Ok;
+    pvalid.imu_icm20948 = imu_icm20948.begin(to_digital(stella::pins::spi::cs::icm20948), SPI_4) == ICM_20948_Stat_Ok;
     if (pvalid.imu_icm20948) {
         imu_icm20948.swReset();
         delay(250);
@@ -364,10 +364,10 @@ void setup() {
     pvalid.gnss_m9v = gnss_m9v.begin(Wire1);
     if (pvalid.gnss_m9v) {
         // Basic configuration
-        gnss_m9v.setI2COutput(COM_TYPE_UBX, VAL_LAYER_RAM_BBR, luna::config::UBLOX_CUSTOM_MAX_WAIT);
-        gnss_m9v.setNavigationFrequency(25, VAL_LAYER_RAM_BBR, luna::config::UBLOX_CUSTOM_MAX_WAIT);
-        gnss_m9v.setAutoPVT(true, VAL_LAYER_RAM_BBR, luna::config::UBLOX_CUSTOM_MAX_WAIT);
-        gnss_m9v.setDynamicModel(DYN_MODEL_AIRBORNE4g, VAL_LAYER_RAM_BBR, luna::config::UBLOX_CUSTOM_MAX_WAIT);
+        gnss_m9v.setI2COutput(COM_TYPE_UBX, VAL_LAYER_RAM_BBR, stella::config::UBLOX_CUSTOM_MAX_WAIT);
+        gnss_m9v.setNavigationFrequency(25, VAL_LAYER_RAM_BBR, stella::config::UBLOX_CUSTOM_MAX_WAIT);
+        gnss_m9v.setAutoPVT(true, VAL_LAYER_RAM_BBR, stella::config::UBLOX_CUSTOM_MAX_WAIT);
+        gnss_m9v.setDynamicModel(DYN_MODEL_AIRBORNE4g, VAL_LAYER_RAM_BBR, stella::config::UBLOX_CUSTOM_MAX_WAIT);
     }
 
     // Task initialization
@@ -385,7 +385,7 @@ void setup() {
 
                << (task_type(read_gnss, 100ul, millis, 2), pvalid.gnss_m9v)
 
-               << task_type(accept_command, &UART_RFD900X, 100ul, millis, 252)
+               << task_type(accept_command, &UART_RPI, 100ul, millis, 252)
 
                << task_type(construct_data, 25ul, millis, 253)
                << (task_type(save_data, &log_interval, 254), pvalid.sd)  // Adaptive
@@ -396,27 +396,27 @@ void setup() {
     // Low power mode
     // See details: https://github.com/stm32duino/STM32LowPower/blob/main/README.md
     LowPower.begin();
-    LowPower.enableWakeupFrom(&UART_RFD900X, [] {
-        accept_command(&UART_RFD900X);
+    LowPower.enableWakeupFrom(&UART_RPI, [] {
+        accept_command(&UART_RPI);
     });
 
     // Peripheral validation
     {
         constexpr auto blink_green = [] {
-            luna::pins::SET_LED(luna::BLUE);
-            gpio_write << io_function::pull_high(luna::pins::gpio::BUZZER);
-            delay(luna::config::BUZZER_ON_INTERVAL);
-            luna::pins::SET_LED(luna::BLACK);
-            gpio_write << io_function::pull_low(luna::pins::gpio::BUZZER);
+            stella::pins::SET_LED(stella::BLUE);
+            gpio_write << io_function::pull_high(stella::pins::gpio::BUZZER);
+            delay(stella::config::BUZZER_ON_INTERVAL);
+            stella::pins::SET_LED(stella::BLACK);
+            gpio_write << io_function::pull_low(stella::pins::gpio::BUZZER);
             delay(250);
         };
 
         constexpr auto blink_red = [] {
-            luna::pins::SET_LED(luna::RED);
-            gpio_write << io_function::pull_high(luna::pins::gpio::BUZZER);
-            delay(luna::config::BUZZER_ON_INTERVAL * 5);
-            luna::pins::SET_LED(luna::BLACK);
-            gpio_write << io_function::pull_low(luna::pins::gpio::BUZZER);
+            stella::pins::SET_LED(stella::RED);
+            gpio_write << io_function::pull_high(stella::pins::gpio::BUZZER);
+            delay(stella::config::BUZZER_ON_INTERVAL * 5);
+            stella::pins::SET_LED(stella::BLACK);
+            gpio_write << io_function::pull_low(stella::pins::gpio::BUZZER);
             delay(250);
         };
 
@@ -433,14 +433,15 @@ void setup() {
 
     tx_data.reserve(512);
     sd_data.reserve(768);
+
     pvalid >> USB_DEBUG << stream::crlf;
     USB_DEBUG << "Init successful!" << stream::crlf;
 
     // Reset timers before starting
-    pwm_led.set_frequency(luna::config::INTERVAL_MS_TO_HZ(luna::config::BUZZER_IDLE_INTERVAL));
+    pwm_led.set_frequency(stella::config::INTERVAL_MS_TO_HZ(stella::config::BUZZER_IDLE_INTERVAL));
     pwm_led.reset();
 
-    gpio_write << io_function::pull_low(luna::pins::gpio::BUZZER);
+    gpio_write << io_function::pull_low(stella::pins::gpio::BUZZER);
     dispatcher.reset();
 }
 
@@ -453,9 +454,9 @@ void init_storage(FsUtil<SdType, FileType> &sd_util_instance) {
 }
 
 void read_continuity() {
-    sensor_data.cont_a = gpio_read.sample<128>(luna::pins::pyro::SENS_A);
-    sensor_data.cont_b = gpio_read.sample<128>(luna::pins::pyro::SENS_B);
-    sensor_data.cont_c = gpio_read.sample<128>(luna::pins::pyro::SENS_C);
+    sensor_data.cont_a = gpio_read.sample<128>(stella::pins::pyro::SENS_A);
+    sensor_data.cont_b = gpio_read.sample<128>(stella::pins::pyro::SENS_B);
+    sensor_data.cont_c = gpio_read.sample<128>(stella::pins::pyro::SENS_C);
 }
 
 void read_internal() {
@@ -464,12 +465,12 @@ void read_internal() {
 }
 
 void read_gnss() {
-    if (gnss_m9v.getPVT(luna::config::UBLOX_CUSTOM_MAX_WAIT)) {
-        sensor_data.timestamp = gnss_m9v.getUnixEpoch(sensor_data.timestamp_us, luna::config::UBLOX_CUSTOM_MAX_WAIT);
-        sensor_data.gps_siv   = gnss_m9v.getSIV(luna::config::UBLOX_CUSTOM_MAX_WAIT);
-        sensor_data.gps_lat   = static_cast<double>(gnss_m9v.getLatitude(luna::config::UBLOX_CUSTOM_MAX_WAIT)) * 1.e-7;
-        sensor_data.gps_lon   = static_cast<double>(gnss_m9v.getLongitude(luna::config::UBLOX_CUSTOM_MAX_WAIT)) * 1.e-7;
-        sensor_data.gps_alt   = static_cast<float>(gnss_m9v.getAltitudeMSL(luna::config::UBLOX_CUSTOM_MAX_WAIT)) * 1.e-3f;
+    if (gnss_m9v.getPVT(stella::config::UBLOX_CUSTOM_MAX_WAIT)) {
+        sensor_data.timestamp = gnss_m9v.getUnixEpoch(sensor_data.timestamp_us, stella::config::UBLOX_CUSTOM_MAX_WAIT);
+        sensor_data.gps_siv   = gnss_m9v.getSIV(stella::config::UBLOX_CUSTOM_MAX_WAIT);
+        sensor_data.gps_lat   = static_cast<double>(gnss_m9v.getLatitude(stella::config::UBLOX_CUSTOM_MAX_WAIT)) * 1.e-7;
+        sensor_data.gps_lon   = static_cast<double>(gnss_m9v.getLongitude(stella::config::UBLOX_CUSTOM_MAX_WAIT)) * 1.e-7;
+        sensor_data.gps_alt   = static_cast<float>(gnss_m9v.getAltitudeMSL(stella::config::UBLOX_CUSTOM_MAX_WAIT)) * 1.e-3f;
     }
 }
 
@@ -625,50 +626,6 @@ void accept_command(HardwareSerial *istream) {
     if (command == "ping" || command == "wake" || command == "on") {
         // <--- Maybe a wakeup command --->
 
-    } else if (command == "arm") {
-        // <--- Arming the rocket --->
-        sensor_data.ps     = luna::state_t::ARMED;
-        tx_interval        = luna::config::TX_ARMED_INTERVAL;
-        log_interval       = luna::config::LOG_ARMED_INTERVAL;
-        sensor_data.pyro_a = luna::pyro_state_t::ARMED;
-        sensor_data.pyro_b = luna::pyro_state_t::ARMED;
-        sensor_data.pyro_c = luna::pyro_state_t::ARMED;
-
-    } else if (command == "disarm") {
-        sensor_data.ps     = luna::state_t::IDLE_SAFE;
-        tx_interval        = luna::config::TX_IDLE_INTERVAL;
-        log_interval       = luna::config::LOG_IDLE_INTERVAL;
-        sensor_data.pyro_a = luna::pyro_state_t::DISARMED;
-        sensor_data.pyro_b = luna::pyro_state_t::DISARMED;
-        sensor_data.pyro_c = luna::pyro_state_t::DISARMED;
-
-    } else if (command == "pad") {
-        // <--- Prelaunch operation --->
-        // Must be armed first!
-        if (sensor_data.ps == luna::state_t::ARMED) {
-            sensor_data.ps = luna::state_t::PAD_PREOP;
-            tx_interval    = luna::config::TX_PAD_PREOP_INTERVAL;
-            log_interval   = luna::config::LOG_PAD_PREOP_INTERVAL;
-        }
-
-    } else if (command == "manual-trigger-a") {
-        if (sensor_data.ps != luna::state_t::IDLE_SAFE && sensor_data.ps != luna::state_t::RECOVERED_SAFE) {
-            gpio_write << io_function::pull_high(luna::pins::pyro::SIG_A);
-            sensor_data.pyro_a = luna::pyro_state_t::FIRING;
-        }
-
-    } else if (command == "manual-trigger-b") {
-        if (sensor_data.ps != luna::state_t::IDLE_SAFE && sensor_data.ps != luna::state_t::RECOVERED_SAFE) {
-            gpio_write << io_function::pull_high(luna::pins::pyro::SIG_B);
-            sensor_data.pyro_b = luna::pyro_state_t::FIRING;
-        }
-
-    } else if (command == "manual-trigger-c") {
-        if (sensor_data.ps != luna::state_t::IDLE_SAFE && sensor_data.ps != luna::state_t::RECOVERED_SAFE) {
-            gpio_write << io_function::pull_high(luna::pins::pyro::SIG_C);
-            sensor_data.pyro_c = luna::pyro_state_t::FIRING;
-        }
-
     } else if (command == "mode-pres-1") {
         sensor_mode.pressure = 0b01;
 
@@ -689,16 +646,6 @@ void accept_command(HardwareSerial *istream) {
 
     } else if (command == "launch-override") {
         launch_override = true;
-
-    } else if (command == "recover") {
-        // <--- Rocket landing confirmed --->
-        sensor_data.ps = luna::state_t::RECOVERED_SAFE;
-        if (sensor_data.pyro_a != luna::pyro_state_t::FIRED)
-            sensor_data.pyro_a = luna::pyro_state_t::DISARMED;
-        if (sensor_data.pyro_b != luna::pyro_state_t::FIRED)
-            sensor_data.pyro_b = luna::pyro_state_t::DISARMED;
-        if (sensor_data.pyro_c != luna::pyro_state_t::FIRED)
-            sensor_data.pyro_c = luna::pyro_state_t::DISARMED;
 
     } else if (command == "zero") {
         // <--- Zero barometric altitude --->
@@ -721,16 +668,16 @@ void accept_command(HardwareSerial *istream) {
     } else if (command == "sleep") {
         // <--- Put the device into deep sleep mode (power saving) --->
         pwm_led.disable();
-        luna::pins::PINS_OFF();
-        luna::pins::SET_LED(luna::BLUE);
+        stella::pins::PINS_OFF();
+        stella::pins::SET_LED(stella::BLUE);
         LowPower.deepSleep();
         pwm_led.reset();
 
     } else if (command == "shutdown") {
         // <--- Shutdown the device --->
         pwm_led.disable();
-        luna::pins::PINS_OFF();
-        luna::pins::SET_LED(luna::RED);
+        stella::pins::PINS_OFF();
+        stella::pins::SET_LED(stella::RED);
 
         if (pvalid.sd) {
             sd_util.close_one();
@@ -773,7 +720,7 @@ void construct_data() {
             << sensor_data.timestamp_us
             << millis()
             << sensor_data.tx_pc++
-            << luna::state_string(sensor_data.ps)
+            << stella::state_string(sensor_data.ps)
             << sensor_mode_string(sensor_mode.pressure)
             << sensor_mode_string(sensor_mode.acceleration)
 
@@ -781,9 +728,9 @@ void construct_data() {
             << String(sensor_data.gps_lon, 6)
             << String(ground_truth.altitude, 4)
 
-            << luna::pyro_state_string(sensor_data.pyro_a)
-            << luna::pyro_state_string(sensor_data.pyro_b)
-            << luna::pyro_state_string(sensor_data.pyro_c)
+            << "N"
+            << "N"
+            << "N"
             << sensor_data.cont_a
             << sensor_data.cont_b
             << sensor_data.cont_c
@@ -813,7 +760,7 @@ void transmit_data(time_type *interval_ms) {
     }
 
     sd([&]() -> void {
-        csv_stream_crlf(UART_RFD900X)
+        csv_stream_crlf(UART_RPI)
                 << "GPS_TIME"
                 << sensor_data.timestamp;
     });
@@ -839,264 +786,71 @@ void save_data(time_type *interval_ms) {
 }
 
 void fsm_eval() {
-    static bool state_satisfaction = false;
-    static time_type launched_time = 0;
-    static algorithm::Sampler sampler[2];
-
-    const double alt_x = filters.altitude.kf.state_vector[0] - ground_truth.altitude_offset;
-    const double vel_x = filters.altitude.kf.state_vector[1];
-    const double acc   = filters.acceleration.kf.state_vector[2];
+    static bool ok = false;
+    static algorithm::Sampler sampler;
 
     switch (sensor_data.ps) {
-        case luna::state_t::STARTUP: {
-            // Next: always transfer
-            sensor_data.ps = luna::state_t::IDLE_SAFE;
+        case stella::state_t::STARTUP: {
+            sensor_data.ps = stella::state_t::IDLE;
             break;
         }
-        case luna::state_t::IDLE_SAFE: {
-            //  <--- Next: wait for uplink --->
-            buzzer_intervals.t_off = luna::config::BUZZER_OFF_INTERVAL(luna::config::BUZZER_IDLE_INTERVAL);
-            break;
-        }
-        case luna::state_t::ARMED: {
-            // <--- Next: wait for uplink --->
-            buzzer_intervals.t_off = luna::config::BUZZER_OFF_INTERVAL(luna::config::BUZZER_ARMED_INTERVAL);
+        case stella::state_t::IDLE: {
+            static on_off_timer tim(500, 50, millis);
 
-            if (launch_override) {
-                sensor_data.ps = luna::state_t::PAD_PREOP;
-                tx_interval    = luna::config::TX_PAD_PREOP_INTERVAL;
-                log_interval   = luna::config::LOG_PAD_PREOP_INTERVAL;
-            }
+            buzzer_intervals.t_off = stella::config::BUZZER_OFF_INTERVAL(stella::config::BUZZER_IDLE_INTERVAL);
 
-            break;
-        }
-        case luna::state_t::PAD_PREOP: {
-            // !!!!! Next: DETECT launch !!!!!
-            buzzer_intervals.t_off = luna::config::BUZZER_OFF_INTERVAL(luna::config::BUZZER_PAD_PREOP_INTERVAL);
-
-            static on_off_timer tim(luna::config::alg::LAUNCH_TON / 2, luna::config::alg::LAUNCH_TON / 2, millis);
-
-            if (!state_satisfaction) {
-                sampler[0].add(acc >= luna::config::alg::LAUNCH_ACC);
-                sampler[1].add(acc >= luna::config::alg::LAUNCH_ACC);
+            if (!ok) {
+                sampler.add(gpio_read.sample<8>(stella::pins::gpio::USER_1));
 
                 tim.on_rising([&] {
-                    if (sampler[0].vote<1, 1>()) {
-                        state_satisfaction |= true;
+                    if (sampler.vote<1, 1>()) {
+                        ok |= true;
                     }
-                    sampler[0].reset();
-                });
-
-                tim.on_falling([&] {
-                    if (sampler[1].vote<1, 1>()) {
-                        state_satisfaction |= true;
-                    }
-                    sampler[1].reset();
+                    sampler.reset();
                 });
             }
 
-            state_satisfaction |= launch_override;
-
-            if (state_satisfaction) {
-                launched_time      = millis();
-                sensor_data.ps     = luna::state_t::POWERED;
-                state_satisfaction = false;
-                sampler[0].reset();
-                sampler[1].reset();
-                tx_interval  = luna::config::TX_ASCEND_INTERVAL;
-                log_interval = luna::config::LOG_ASCEND_INTERVAL;
+            if (ok) {
+                sensor_data.ps = stella::state_t::START_RECORD;
             }
 
             break;
         }
-        case luna::state_t::POWERED: {
-            // !!!!! Next: DETECT motor burnout !!!!!
-            buzzer_intervals.t_off = luna::config::BUZZER_OFF_INTERVAL(luna::config::BUZZER_ASCEND_INTERVAL);
+        case stella::state_t::START_RECORD: {
+            // <--- Start Recording --->
+            csv_stream_crlf(UART_RPI)
+                    << "COMMAND"
+                    << "START";
 
-            static on_off_timer tim(luna::config::alg::BURNOUT_TON / 2, luna::config::alg::BURNOUT_TON / 2, millis);
+            sensor_data.ps = stella::state_t::RECORDING;
+            break;
+        }
+        case stella::state_t::RECORDING: {
+            static on_off_timer tim(500, 50, millis);
 
-            if (!state_satisfaction) {
-                sampler[0].add(acc < luna::config::alg::LAUNCH_ACC);
-                sampler[1].add(acc < luna::config::alg::LAUNCH_ACC);
+            if (!ok) {
+                sampler.add(gpio_read.sample<8>(stella::pins::gpio::USER_1));
 
                 tim.on_rising([&] {
-                    if (sampler[0].vote<1, 1>()) {
-                        state_satisfaction |= millis() - launched_time >= luna::config::TIME_TO_BURNOUT_MIN;
+                    if (sampler.vote<1, 1>()) {
+                        ok |= true;
                     }
-                    sampler[0].reset();
-                });
-
-                tim.on_falling([&] {
-                    if (sampler[1].vote<1, 1>()) {
-                        state_satisfaction |= millis() - launched_time >= luna::config::TIME_TO_BURNOUT_MIN;
-                    }
-                    sampler[1].reset();
+                    sampler.reset();
                 });
             }
 
-            state_satisfaction |= millis() - launched_time >= luna::config::TIME_TO_BURNOUT_MAX;
-
-            if (state_satisfaction) {
-                sensor_data.ps     = luna::state_t::COASTING;
-                state_satisfaction = false;
-                sampler[0].reset();
-                sampler[1].reset();
+            if (ok) {
+                sensor_data.ps = stella::state_t::STOP_RECORD;
             }
-
             break;
         }
-        case luna::state_t::COASTING: {
-            // !!!!! Next: DETECT apogee !!!!!
-            buzzer_intervals.t_off = luna::config::BUZZER_OFF_INTERVAL(luna::config::BUZZER_ASCEND_INTERVAL);
+        case stella::state_t::STOP_RECORD: {
+            // <--- Stop Recording --->
+            csv_stream_crlf(UART_RPI)
+                    << "COMMAND"
+                    << "STOP";
 
-            static on_off_timer tim(luna::config::alg::APOGEE_SLOW_TON / 2, luna::config::alg::APOGEE_SLOW_TON / 2, millis);
-
-            if (!state_satisfaction) {
-                sampler[0].add(vel_x <= luna::config::alg::APOGEE_VEL);
-                sampler[1].add(vel_x <= luna::config::alg::APOGEE_VEL);
-
-                tim.on_rising([&] {
-                    if (sampler[0].vote<1, 1>()) {
-                        state_satisfaction |= millis() - launched_time >= luna::config::TIME_TO_APOGEE_MIN;
-                    }
-                    sampler[0].reset();
-                });
-
-                tim.on_falling([&] {
-                    if (sampler[1].vote<1, 1>()) {
-                        state_satisfaction |= millis() - launched_time >= luna::config::TIME_TO_APOGEE_MIN;
-                    }
-                    sampler[1].reset();
-                });
-
-                state_satisfaction |= millis() - launched_time >= luna::config::TIME_TO_APOGEE_MAX;
-            }
-
-            if (state_satisfaction) {
-                sensor_data.ps     = luna::state_t::DROGUE_DEPLOY;
-                state_satisfaction = false;
-                sampler[0].reset();
-                sampler[1].reset();
-            }
-
-            break;
-        }
-        case luna::state_t::DROGUE_DEPLOY: {
-            // Next: activate and always transfer
-            buzzer_intervals.t_off = luna::config::BUZZER_OFF_INTERVAL(luna::config::BUZZER_DESCEND_INTERVAL);
-
-            static bool fired      = false;
-
-            if (!fired) {
-                gpio_write << io_function::pull_high(luna::pins::pyro::SIG_A);
-                sensor_data.pyro_a = luna::pyro_state_t::FIRING;
-                fired              = true;
-            } else if (sensor_data.pyro_a == luna::pyro_state_t::FIRED) {
-                sensor_data.ps = luna::state_t::DROGUE_DESCEND;
-            }
-
-            break;
-        }
-        case luna::state_t::DROGUE_DESCEND: {
-            // !!!!! Next: DETECT main deployment altitude !!!!!
-            buzzer_intervals.t_off = luna::config::BUZZER_OFF_INTERVAL(luna::config::BUZZER_DESCEND_INTERVAL);
-
-            static on_off_timer tim(luna::config::alg::MAIN_DEPLOYMENT_TON / 2, luna::config::alg::MAIN_DEPLOYMENT_TON / 2, millis);
-
-            if (!state_satisfaction) {
-                sampler[0].add(alt_x <= luna::config::alg::MAIN_ALTITUDE);
-                sampler[1].add(alt_x <= luna::config::alg::MAIN_ALTITUDE);
-
-                tim.on_rising([&] {
-                    if (sampler[0].vote<1, 1>()) {
-                        state_satisfaction |= true;
-                    }
-                    sampler[0].reset();
-                });
-
-                tim.on_falling([&] {
-                    if (sampler[1].vote<1, 1>()) {
-                        state_satisfaction |= true;
-                    }
-                    sampler[1].reset();
-                });
-            }
-
-            if (state_satisfaction) {
-                sensor_data.ps     = luna::state_t::MAIN_DEPLOY;
-                state_satisfaction = false;
-                sampler[0].reset();
-                sampler[1].reset();
-                tx_interval  = luna::config::TX_DESCEND_INTERVAL;
-                log_interval = luna::config::LOG_DESCEND_INTERVAL;
-            }
-
-            break;
-        }
-        case luna::state_t::MAIN_DEPLOY: {
-            // Next: activate and always transfer
-            buzzer_intervals.t_off = luna::config::BUZZER_OFF_INTERVAL(luna::config::BUZZER_DESCEND_INTERVAL);
-
-            static bool fired      = false;
-
-            if (!fired) {
-                gpio_write << io_function::pull_high(luna::pins::pyro::SIG_B);
-                sensor_data.pyro_b = luna::pyro_state_t::FIRING;
-                fired              = true;
-            } else if (sensor_data.pyro_b == luna::pyro_state_t::FIRED) {
-                sensor_data.ps = luna::state_t::MAIN_DESCEND;
-            }
-
-            break;
-        }
-        case luna::state_t::MAIN_DESCEND: {
-            // !!!!! Next: DETECT landing !!!!!
-            buzzer_intervals.t_off = luna::config::BUZZER_OFF_INTERVAL(luna::config::BUZZER_DESCEND_INTERVAL);
-
-            static on_off_timer tim(luna::config::alg::LANDING_TON / 2, luna::config::alg::LANDING_TON / 2, millis);
-
-            if (!state_satisfaction) {
-                const bool stable = algorithm::is_zero(vel_x, 0.5);
-                sampler[0].add(stable);
-                sampler[1].add(stable);
-
-                tim.on_rising([&] {
-                    if (sampler[0].vote<1, 1>()) {
-                        state_satisfaction |= true;
-                    }
-                    sampler[0].reset();
-                });
-
-                tim.on_falling([&] {
-                    if (sampler[1].vote<1, 1>()) {
-                        state_satisfaction |= true;
-                    }
-                    sampler[1].reset();
-                });
-            }
-
-            if (state_satisfaction) {
-                sensor_data.ps     = luna::state_t::LANDED;
-                state_satisfaction = false;
-                sampler[0].reset();
-                sampler[1].reset();
-                tx_interval  = luna::config::TX_IDLE_INTERVAL;
-                log_interval = luna::config::LOG_IDLE_INTERVAL;
-            }
-
-            break;
-        }
-        case luna::state_t::LANDED: {
-            // <--- Next: wait for uplink --->
-            buzzer_intervals.t_off = luna::config::BUZZER_OFF_INTERVAL(luna::config::BUZZER_DESCEND_INTERVAL);
-
-            break;
-        }
-        case luna::state_t::RECOVERED_SAFE: {
-            // Sink state (requires reboot)
-            buzzer_intervals.t_off = luna::config::BUZZER_OFF_INTERVAL(luna::config::BUZZER_IDLE_INTERVAL);
-
-            do_nothing();
+            sensor_data.ps = stella::state_t::IDLE;
             break;
         }
         default:
@@ -1106,12 +860,12 @@ void fsm_eval() {
 
 void buzzer_led_control(on_off_timer::interval_params *intervals_ms) {
     // Interval change keeper
-    static time_type prev_on        = intervals_ms->t_on;
-    static time_type prev_off       = intervals_ms->t_off;
-    static luna::state_t prev_state = luna::state_t::STARTUP;
+    static time_type prev_on          = intervals_ms->t_on;
+    static time_type prev_off         = intervals_ms->t_off;
+    static stella::state_t prev_state = stella::state_t::STARTUP;
 
     static struct {
-        luna::RGB_MASK value = luna::RGB_MASK::BLACK;
+        stella::RGB_MASK value = stella::RGB_MASK::BLACK;
     } onboard_led;
 
     // On-off timer
@@ -1123,7 +877,7 @@ void buzzer_led_control(on_off_timer::interval_params *intervals_ms) {
         prev_on  = intervals_ms->t_on;
         prev_off = intervals_ms->t_off;
 
-        pwm_led.set_frequency(luna::config::INTERVAL_MS_TO_HZ(intervals_ms->t_on + intervals_ms->t_off));
+        pwm_led.set_frequency(stella::config::INTERVAL_MS_TO_HZ(intervals_ms->t_on + intervals_ms->t_off));
         pwm_led.reset();
     }
 
@@ -1131,41 +885,18 @@ void buzzer_led_control(on_off_timer::interval_params *intervals_ms) {
         prev_state = sensor_data.ps;
 
         switch (sensor_data.ps) {
-            case luna::state_t::IDLE_SAFE:
-                onboard_led.value = luna::RGB_MASK::GREEN;
+            case stella::state_t::IDLE:
+                onboard_led.value = stella::RGB_MASK::GREEN;
                 break;
-
-            case luna::state_t::ARMED:
-                onboard_led.value = luna::RGB_MASK::RED;
+            case stella::state_t::RECORDING:
+                onboard_led.value = stella::RGB_MASK::RED;
                 break;
-
-            case luna::state_t::PAD_PREOP:
-                onboard_led.value = luna::RGB_MASK::RED;
-                break;
-
-            case luna::state_t::LANDED:
-                onboard_led.value = luna::RGB_MASK::BLUE;
-                break;
-
-            case luna::state_t::RECOVERED_SAFE:
-                onboard_led.value = luna::RGB_MASK::GREEN;
-                break;
-
             default:
-                onboard_led.value = luna::RGB_MASK::WHITE;
                 break;
         }
 
-        if (sensor_data.ps == luna::state_t::ARMED) {
-            pwm_led.set_color(onboard_led.value, luna::RGB_MASK::GREEN);
-        } else {
-            pwm_led.set_color(onboard_led.value);
-        }
-        if (sensor_data.ps == luna::state_t::PAD_PREOP) {
-            pwm_led.set_buzzer(false);
-        } else {
-            pwm_led.set_buzzer(true);
-        }
+        pwm_led.set_color(onboard_led.value);
+        pwm_led.set_buzzer(false);
         pwm_led.reset();
     }
 }
